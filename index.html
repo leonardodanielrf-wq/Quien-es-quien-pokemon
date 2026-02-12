@@ -7,18 +7,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="setup">
-        <h1>¿Quién es quién?</h1>
-        <p>Estilo Pokémon</p>
+    <div class="container" id="setup">
+        <h1>¡Bienvenido!</h1>
+        <p class="sub">¿Quién es quién? Estilo Pokémon</p>
         <button onclick="iniciarJuego()">EMPEZAR JUEGO</button>
     </div>
 
-    <div id="game" style="display:none;">
-        <div id="header">
-            <h2 id="status">Toca tu Pokémon secreto</h2>
-            <div id="mi-target"></div>
-        </div>
-        <div id="board" class="grid-container"></div>
+    <div class="container" id="game" style="display:none;">
+        <h2 id="status">Toca tu Pokémon secreto</h2>
+        <div id="pokedex" class="pokedex"></div>
+        <button onclick="location.reload()">Reiniciar Partida</button>
     </div>
 
     <script src="script.js"></script>

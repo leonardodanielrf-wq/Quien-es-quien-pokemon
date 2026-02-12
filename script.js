@@ -1,49 +1,52 @@
 let pokemonSeleccionado = false;
 
 async function iniciarJuego() {
+    // 1. Mostrar el área de juego
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
     
-    const board = document.getElementById('board');
-    board.innerHTML = "Generando Pokédex...";
+    const board = document.getElementById('pokedex');
+    board.innerHTML = "Cargando Pokédex...";
 
-    // Generar 40 IDs aleatorios entre el 1 y el 898
+    // 2. Generar 40 IDs únicos aleatorios
     const ids = [];
     while(ids.length < 40) {
         let r = Math.floor(Math.random() * 898) + 1;
         if(!ids.includes(r)) ids.push(r);
     }
 
-    board.innerHTML = ""; // Limpiar texto de carga
+    board.innerHTML = ""; // Limpiar mensaje de carga
 
+    // 3. Cargar datos de la API
     for(let id of ids) {
         try {
             const res = await fetch(`https://pokeapi.co{id}`);
             const data = await res.json();
 
             const card = document.createElement('div');
-            card.className = 'card';
-            // Usamos el sprite oficial de alta calidad
-            const imgUrl = data.sprites.front_default;
-            card.innerHTML = `<img src="${imgUrl}"><p>${data.name.toUpperCase()}</p>`;
+            card.className = 'pokemon';
+            card.innerHTML = `
+                <img src="${data.sprites.front_default}">
+                <p>${data.name.toUpperCase()}</p>
+            `;
 
             card.onclick = () => {
                 if (!pokemonSeleccionado) {
-                    // Acción: Elegir mi Pokémon secreto
-                    card.classList.add('secreto');
+                    // El primer toque elige TU Pokémon
+                    card.classList.add('selected');
                     pokemonSeleccionado = true;
                     document.getElementById('status').innerText = "¡Adivina el del rival!";
-                    document.getElementById('mi-target').innerHTML = `
-                        <p style="color:#4CAF50; margin:0;">TU POKÉMON: ${data.name.toUpperCase()}</p>
-                    `;
+                    document.getElementById('status').style.color = "#4CAF50";
                 } else {
-                    // Acción: Marcar/Desmarcar para descartar (si no es el elegido)
-                    if (!card.classList.contains('secreto')) {
-                        card.classList.toggle('marcado');
+                    // Los siguientes toques descartan a los demás
+                    if (!card.classList.contains('selected')) {
+                        card.classList.toggle('marked');
                     }
                 }
             };
             board.appendChild(card);
-        } catch (e) { console.error("Error cargando pokemon", e); }
+        } catch (error) {
+            console.log("Error cargando Pokémon:", error);
+        }
     }
 }
