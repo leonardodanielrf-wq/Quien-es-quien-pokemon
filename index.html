@@ -4,21 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Poke-Quién es Quién</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #ed1c24; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+        .container { background: white; width: 100%; max-width: 850px; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .pokedex { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin: 20px 0; }
+        .pokemon { background: #f0f0f0; border-radius: 10px; padding: 5px; cursor: pointer; border: 3px solid transparent; }
+        .pokemon img { width: 100%; height: auto; display: block; }
+        .pokemon p { font-size: 8px; font-weight: bold; margin: 3px 0 0; color: #333; }
+        /* Estados */
+        .pokemon.selected { border-color: #4CAF50; background: #e8f5e9; transform: scale(1.05); }
+        .pokemon.marked { opacity: 0.15; filter: grayscale(100%); }
+        button { background: #3b4cca; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 30px; cursor: pointer; font-weight: bold; }
+        @media (max-width: 600px) { .pokedex { grid-template-columns: repeat(4, 1fr); } }
+    </style>
 </head>
 <body>
     <div class="container" id="setup">
         <h1>¡Bienvenido!</h1>
-        <p class="sub">¿Quién es quién? Estilo Pokémon</p>
-        <button onclick="iniciarJuego()">EMPEZAR JUEGO</button>
+        <p>¿Quién es quién? Pokémon</p>
+        <button onclick="iniciar()">EMPEZAR JUEGO</button>
     </div>
 
     <div class="container" id="game" style="display:none;">
-        <h2 id="status">Toca tu Pokémon secreto</h2>
+        <h2 id="status" style="color:#ed1c24">Toca tu Pokémon secreto</h2>
         <div id="pokedex" class="pokedex"></div>
-        <button onclick="location.reload()">Reiniciar Partida</button>
+        <button onclick="location.reload()">Reiniciar</button>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        let elegido = false;
+        function iniciar() {
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            const board = document.getElementById('pokedex');
+            
+            // Generar 40 IDs de la 1ra y 2da generación (más estables)
+            for(let i=0; i<40; i++) {
+                const id = Math.floor(Math.random() * 251) + 1;
+                const card = document.createElement('div');
+                card.className = 'pokemon';
+                // URL directa de imágenes para que no falle la conexión
+                const imgUrl = `https://raw.githubusercontent.com{id}.png`;
+                
+                card.innerHTML = `<img src="${imgUrl}"><p>PKMN #${id}</p>`;
+                card.onclick = () => {
+                    if (!elegido) {
+                        card.classList.add('selected');
+                        elegido = true;
+                        document.getElementById('status').innerText = "¡Adivina el del rival!";
+                        document.getElementById('status').style.color = "#4CAF50";
+                    } else if (!card.classList.contains('selected')) {
+                        card.classList.toggle('marked');
+                    }
+                };
+                board.appendChild(card);
+            }
+        }
+    </script>
 </body>
 </html>
+
