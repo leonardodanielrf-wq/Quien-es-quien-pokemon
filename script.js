@@ -1,39 +1,49 @@
-const pokemones = [
-  { nombre: "Pikachu", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" },
-  { nombre: "Bulbasaur", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" },
-  { nombre: "Charmander", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" },
-  { nombre: "Squirtle", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" },
-  { nombre: "Eevee", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png" },
-  { nombre: "Snorlax", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png" }
-];
+let pokemonSeleccionado = false;
 
-const pokedex = document.getElementById("pokedex");
-const confirmarBtn = document.getElementById("confirmar");
+async function iniciarJuego() {
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+    
+    const board = document.getElementById('board');
+    board.innerHTML = "Generando Pokédex...";
 
-let seleccionado = null;
+    // Generar 40 IDs aleatorios entre el 1 y el 898
+    const ids = [];
+    while(ids.length < 40) {
+        let r = Math.floor(Math.random() * 898) + 1;
+        if(!ids.includes(r)) ids.push(r);
+    }
 
-pokemones.forEach(pokemon => {
-  const card = document.createElement("div");
-  card.classList.add("pokemon");
+    board.innerHTML = ""; // Limpiar texto de carga
 
-  card.innerHTML = `
-    <img src="${pokemon.img}" alt="${pokemon.nombre}">
-    <p>${pokemon.nombre}</p>
-  `;
+    for(let id of ids) {
+        try {
+            const res = await fetch(`https://pokeapi.co{id}`);
+            const data = await res.json();
 
-  card.addEventListener("click", () => {
-    document.querySelectorAll(".pokemon").forEach(p => p.classList.remove("selected"));
-    card.classList.add("selected");
-    seleccionado = pokemon;
+            const card = document.createElement('div');
+            card.className = 'card';
+            // Usamos el sprite oficial de alta calidad
+            const imgUrl = data.sprites.front_default;
+            card.innerHTML = `<img src="${imgUrl}"><p>${data.name.toUpperCase()}</p>`;
 
-    confirmarBtn.disabled = false;
-    confirmarBtn.classList.add("enabled");
-  });
-
-  pokedex.appendChild(card);
-});
-
-confirmarBtn.addEventListener("click", () => {
-  // INTENCIONALMENTE NO HACE NADA
-  console.log("Pokémon seleccionado:", seleccionado);
-});
+            card.onclick = () => {
+                if (!pokemonSeleccionado) {
+                    // Acción: Elegir mi Pokémon secreto
+                    card.classList.add('secreto');
+                    pokemonSeleccionado = true;
+                    document.getElementById('status').innerText = "¡Adivina el del rival!";
+                    document.getElementById('mi-target').innerHTML = `
+                        <p style="color:#4CAF50; margin:0;">TU POKÉMON: ${data.name.toUpperCase()}</p>
+                    `;
+                } else {
+                    // Acción: Marcar/Desmarcar para descartar (si no es el elegido)
+                    if (!card.classList.contains('secreto')) {
+                        card.classList.toggle('marcado');
+                    }
+                }
+            };
+            board.appendChild(card);
+        } catch (e) { console.error("Error cargando pokemon", e); }
+    }
+}
